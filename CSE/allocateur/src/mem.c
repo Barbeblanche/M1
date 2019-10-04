@@ -4,35 +4,48 @@
 #include "common.h"
 #include <stdio.h>
 
+//-------------------------------------------------------------
+// get_pzl
+//-------------------------------------------------------------
+struct fb *get_pzl(){
+   struct fb** pzl = (struct fb**)((char*)get_memory_adr() + sizeof(mem_fit_function_t *));    // adresse du pointeur de la première zone libre
+   *pzl = (struct fb*)((char *)get_memory_adr() + sizeof(mem_fit_function_t *) + sizeof(struct fb*));    // on fait pointer pzl vers la première zone libre
+   return *pzl;
+}
+
 
 //-------------------------------------------------------------
 // mem_init
 //-------------------------------------------------------------
 void mem_init() {
-   /* A COMPLETER */
 
-   // Le début de la mémoire corrrespond à tête de la liste chaînée des zones libres
-   struct fb** pfz = (struct fb**)get_memory_adr();
-   *pfz = (struct fb*)((char *)get_memory_adr() + sizeof(struct fb*));
+   // Le début de la mémoire est un pointeur vers la fonction de recherche
+   mem_fit_function_t **fonction_alloc = (mem_fit_function_t**) get_memory_adr();
+   *fonction_alloc = NULL;
+
+   // Le deuxième élément est le pointeur vers la 1ere zone libre
+   struct fb* premiere_zone_libre = get_pzl();
 
    // le reste de la mémoire est une zone libre
-   (*pfz)->size = get_memory_size() - sizeof(struct fb*);
-   (*pfz)->next = NULL ;
+   premiere_zone_libre->size = get_memory_size() - sizeof(mem_fit_function_t *) - sizeof(struct fb*);
+   premiere_zone_libre->next = NULL ;
 }
 
 //-------------------------------------------------------------
 // mem_alloc
 //-------------------------------------------------------------
 void* mem_alloc(size_t size) {
-   struct fb **pfz = (struct fb**)get_memory_adr();
-   return mem_first_fit(*pfz, size);
+  // mem_fit_function_t **fonction_alloc = (mem_fit_function_t **)get_memory_adr();
+   //struct fb *pzl = get_pzl();
+  
+   return NULL;//0fonction_alloc(*pfz, size);
 }
 
 //-------------------------------------------------------------
 // mem_free
 //-------------------------------------------------------------
 void mem_free(void* zone) {
-   /* A COMPLETER */
+   
 }
 
 //-------------------------------------------------------------
@@ -47,9 +60,8 @@ void mem_show(void (*print)(void *, size_t, int free)) {
 // mem_fit
 //-------------------------------------------------------------
 void mem_fit(mem_fit_function_t* mff) {
-
-
-
+   mem_fit_function_t **fonction_alloc = (mem_fit_function_t**) get_memory_adr();
+   *fonction_alloc = mff;
 }
 
 //-------------------------------------------------------------
@@ -104,7 +116,7 @@ struct fb* mem_best_fit(struct fb* head, size_t size) {
     temp = head;
     while(temp->next != NULL){
  	   if(temp->next->size >= size){
- 		   if ((best_fit == NULL) || (prev_best_fit->next->size > temp->next->size)){
+ 		   if ((prev_best_fit->next == NULL) || (prev_best_fit->next->size > temp->next->size)){
  			   prev_best_fit = temp;
  		   }
 		   else if (prev_best_fit->next->size == size){
@@ -116,15 +128,15 @@ struct fb* mem_best_fit(struct fb* head, size_t size) {
  	   }
     }
 	if (prev_best_fit != NULL){
-		if(best_fit->size - size >= sizeof(struct fb*)){
+		if(prev_best_fit->next->size - size >= sizeof(struct fb*)){
 			adresse_allouee = prev_best_fit->next;
 			zone_libre = prev_best_fit->next + size;
 			zone_libre->size = temp->next->size - size;
 			zone_libre->next = prev_best_fit->next->next;
-			best_fit = zone_libre;
+			prev_best_fit->next = zone_libre;
 		}
 		else {
-			adresse_allouee = best_fit;
+			adresse_allouee = prev_best_fit->next;
 		}
 	}
 
