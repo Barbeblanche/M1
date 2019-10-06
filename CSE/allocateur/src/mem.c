@@ -67,12 +67,12 @@ void* mem_alloc(size_t size) {
    struct fb* tmp = variables->ffz; // pour modifier le chaînage des zones libres
    struct bb* new_alloc_zone;
    
-   if(free_zone_size > size + sizeof(struct bb) + sizeof(struct fb)){ 
+   if(free_zone_size >= size + sizeof(struct bb) + sizeof(struct fb)){ 
       // si la zone libre est suffisamment grande, on veut garder le suplus comme zone libre
 
       // création de la zone occupée
       new_alloc_zone = (struct bb*)free_zone; 
-      new_alloc_zone->size = size + sizeof(struct bb*);
+      new_alloc_zone->size = size + sizeof(struct bb);
 
       // maj de la zone libre
 	   free_zone = (struct fb*)((char *)new_alloc_zone + new_alloc_zone->size);
