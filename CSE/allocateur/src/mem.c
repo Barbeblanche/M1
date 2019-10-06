@@ -20,7 +20,7 @@ void mem_init() {
    variables->ffz = (struct fb*)((char *)get_memory_adr() + sizeof(global_s));
 
    // le reste de la mémoire est une zone libre
-   variables->ffz->size = get_memory_size() - sizeof(struct fb);
+   variables->ffz->size = get_memory_size() - sizeof(global_s);
    variables->ffz->next = NULL ;
 }
 
@@ -62,6 +62,7 @@ void* mem_alloc(size_t size) {
    if(free_zone == NULL){
 	   return NULL;
    }
+
    size_t free_zone_size = free_zone->size;
    struct fb* tmp = variables->ffz; // pour modifier le chaînage des zones libres
    struct bb* new_alloc_zone;
