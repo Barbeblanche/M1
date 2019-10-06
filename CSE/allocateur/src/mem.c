@@ -92,7 +92,7 @@ void* mem_alloc(size_t size) {
    }
    else{  // la zone libre devient une zone occupée
       new_alloc_zone = (struct bb*) free_zone;
-      new_alloc_zone->size = size + sizeof(struct bb*);
+      new_alloc_zone->size = free_zone_size;
 
       // maj chaînage
 	   if (variables->ffz == (struct fb*)new_alloc_zone){ // première zone libre
