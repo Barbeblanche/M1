@@ -66,12 +66,12 @@ void* mem_alloc(size_t size) {
    size_t free_zone_size = free_zone->size;
    struct fb* tmp = variables->ffz; // pour modifier le chaînage des zones libres
    struct bb* new_alloc_zone;
-   
-   if(free_zone_size >= size + sizeof(struct bb) + sizeof(struct fb)){ 
+
+   if(free_zone_size >= size + sizeof(struct bb) + sizeof(struct fb)){
       // si la zone libre est suffisamment grande, on veut garder le suplus comme zone libre
 
       // création de la zone occupée
-      new_alloc_zone = (struct bb*)free_zone; 
+      new_alloc_zone = (struct bb*)free_zone;
       new_alloc_zone->size = size + sizeof(struct bb);
 
       // maj de la zone libre
@@ -118,10 +118,10 @@ struct fb* connect_zone(struct fb* previous_zone, struct fb* next_zone, int* has
 
 	if((struct fb*)((char*)previous_zone + previous_zone->size) == next_zone){ // fusion entre zone et next_zone
 		int new_size = previous_zone->size + next_zone->size;
-		previous_zone->size = new_size; 
+		previous_zone->size = new_size;
 		*has_merged = 1;
 	}
-	else{ 
+	else{
 		previous_zone->next = next_zone;
 		*has_merged = 0;
 	}
@@ -139,18 +139,22 @@ void mem_free(void* zone) {
    int is_zone_found = 0;
    int has_merged;
 
-
+   //Cas où la mem est pleine
    if(variables->ffz == NULL){
    	struct fb* new_free_zone = (struct fb*)zone;
 		new_free_zone->next = NULL;
+    new_free_zone->size = ((struct bb*)zone)->size;
 		variables->ffz = new_free_zone;
    }
+   //Pourquoi ? Comment savoir qu'il n'y a pas de zone occupée entre la zone a free et la 1ere zone libre ? -> réponse : grace a connect_zone()
    else if(variables->ffz > (struct fb*) zone){
+     //A quel moment on supprime les données que contient la zone ?
+     //pourquoi (struct fb*)zone et pas (struct bb*)zone
    	variables->ffz = connect_zone((struct fb*)zone,variables->ffz,&has_merged);
    }
    else{
    	tmp = variables->ffz;
-   	
+
    	while(!is_zone_found){	// invariant : tmp != NULL
    		if(tmp->next == NULL){	// zone se situe après tmp
    			tmp = connect_zone(tmp,(struct fb*)zone,&has_merged);
@@ -188,8 +192,8 @@ void mem_show(void (*print)(void *, size_t, int free)) {
    struct fb* tmp = variables->ffz;
    int is_free;
 
-   void *adr_mem = (void *)((char *)get_memory_adr() + sizeof(struct global_s));  
-   
+   void *adr_mem = (void *)((char *)get_memory_adr() + sizeof(struct global_s));
+
    while (mem_readed < get_memory_size()){ // tant qu'on a pas exploré toute la mémoire
 	   if(tmp == NULL || (struct fb*)adr_mem != tmp){  // si l'adr courante n'est pas une zone libre
 			is_free = 0;
@@ -205,7 +209,7 @@ void mem_show(void (*print)(void *, size_t, int free)) {
 	   }
 	   else {	// si on est au début d'une zone libre
 			is_free = 1;
-           
+
        	// appel de la fonction d'affichage
        	(*print)(adr_mem,((struct fb*)adr_mem)->size,is_free);
 
@@ -230,8 +234,8 @@ void mem_fit(mem_fit_function_t* mff) {
 //-------------------------------------------------------------
 // Stratégies d'allocation
 //-------------------------------------------------------------
-struct fb* mem_first_fit(struct fb* head, size_t size) {	
-   
+struct fb* mem_first_fit(struct fb* head, size_t size) {
+
    size += sizeof(struct bb*); 		// taille totale : size + taille d'une structure bb
 
    struct fb *temp;
@@ -251,7 +255,7 @@ struct fb* mem_first_fit(struct fb* head, size_t size) {
 
 //-------------------------------------------------------------
 struct fb* mem_best_fit(struct fb* head, size_t size) {
-	
+
 	size += sizeof(struct bb*); 		// taille totale : size + taille d'une structure bb
 
    struct fb *temp;
