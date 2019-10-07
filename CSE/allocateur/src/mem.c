@@ -110,11 +110,70 @@ void* mem_alloc(size_t size) {
    //return (void *)(new_alloc_zone + 1);
 }
 
+
+//-------------------------------------------------------------
+// connect_zone
+//-------------------------------------------------------------
+struct fb* connect_zone(struct fb* previous_zone, struct fb* next_zone, int* has_merged){
+
+	if((struct fb*)((char*)previous_zone + previous_zone->size) == next_zone){ // fusion entre zone et next_zone
+		int new_size = previous_zone->size + next_zone->size;
+		previous_zone->size = new_size; 
+		*has_merged = 1;
+	}
+	else{ 
+		previous_zone->next = next_zone;
+		*has_merged = 0;
+	}
+	return previous_zone;
+}
+
 //-------------------------------------------------------------
 // mem_free
 //-------------------------------------------------------------
 void mem_free(void* zone) {
+	zone -= sizeof(struct bb);
+	global_s *variables = (global_s *)get_memory_adr();
 
+   struct fb* tmp;
+   int is_zone_found = 0;
+   int has_merged;
+
+
+   if(variables->ffz == NULL){
+   	struct fb* new_free_zone = (struct fb*)zone;
+		new_free_zone->next = NULL;
+		variables->ffz = new_free_zone;
+   }
+   else if(variables->ffz > (struct fb*) zone){
+   	variables->ffz = connect_zone((struct fb*)zone,variables->ffz,&has_merged);
+   }
+   else{
+   	tmp = variables->ffz;
+   	
+   	while(!is_zone_found){	// invariant : tmp != NULL
+   		if(tmp->next == NULL){	// zone se situe après tmp
+   			tmp = connect_zone(tmp,(struct fb*)zone,&has_merged);
+   			is_zone_found = 1;
+   		}
+
+
+	   	else if(tmp->next != NULL && tmp->next < (struct fb*) zone){
+	   		tmp = tmp->next;
+	   	}
+
+	   	else{	// zone se situe entre tmp et tmp->next
+	   		tmp = connect_zone(tmp,(struct fb*)zone,&has_merged);
+	   		if(has_merged){
+	   			tmp = connect_zone(tmp,tmp->next,&has_merged);
+	   		}
+	   		else {
+	   			tmp = connect_zone((struct fb*)zone,tmp->next,&has_merged);
+	   		}
+	   		is_zone_found = 1;
+	   	}
+	   }
+   }
 }
 
 //-------------------------------------------------------------
