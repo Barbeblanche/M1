@@ -64,6 +64,8 @@ void* mem_alloc(size_t size) {
    }
 
    size_t free_zone_size = free_zone->size;
+   struct fb* old_free_zone_next = free_zone->next;
+
    struct fb* tmp = variables->ffz; // pour modifier le chaînage des zones libres
    struct bb* new_alloc_zone;
    
@@ -80,13 +82,15 @@ void* mem_alloc(size_t size) {
 
       // maj du chainage des zones libres
 	   if (variables->ffz == (struct fb*)new_alloc_zone){  // si la zone libre était la première de la liste
+		   free_zone->next = old_free_zone_next;
 		   variables->ffz = free_zone;
 	   }
    	else {
 	      // sinon on cherche l'ancienne zone libre (càd new_alloc_zone)
-			while (tmp != NULL && tmp->next == (struct fb*)new_alloc_zone){
+			while (tmp != NULL && tmp->next != (struct fb*)new_alloc_zone){
 	         tmp = tmp->next;
 			}
+			free_zone->next = old_free_zone_next;
 	      tmp->next = free_zone; // tmp ne peut pas être nul avant d'avoir trouvé new_alloc_zone
 		   }
    }
@@ -99,10 +103,10 @@ void* mem_alloc(size_t size) {
 		   variables->ffz = variables->ffz->next;
 	   }
       else {
-         while (tmp != NULL && tmp->next == (struct fb*)new_alloc_zone){
+         while (tmp != NULL && tmp->next != (struct fb*)new_alloc_zone){
             tmp = tmp->next;
          }
-      tmp->next = tmp->next->next; // tmp ne peut pas être nul avant d'avoir trouvé new_alloc_zone
+      	tmp->next = old_free_zone_next; // tmp ne peut pas être nul avant d'avoir trouvé new_alloc_zone
       }
    }
 
@@ -118,10 +122,17 @@ struct fb* connect_zone(struct fb* previous_zone, struct fb* next_zone, int* has
 
 	if((struct fb*)((char*)previous_zone + previous_zone->size) == next_zone){ // fusion entre zone et next_zone
 		int new_size = previous_zone->size + next_zone->size;
-		previous_zone->size = new_size; 
+		previous_zone->size = new_size;
+		if((struct fb*)((char*)previous_zone + previous_zone->size) == previous_zone->next){	// fusion des deux côtés
+			new_size = previous_zone->size + previous_zone->next->size;
+			previous_zone->size = new_size;
+			previous_zone->next = previous_zone->next->next;
+		}
+		
 		*has_merged = 1;
 	}
 	else{ 
+		next_zone->next = previous_zone->next;
 		previous_zone->next = next_zone;
 		*has_merged = 0;
 	}
@@ -165,7 +176,7 @@ void mem_free(void* zone) {
 	   	else{	// zone se situe entre tmp et tmp->next
 	   		tmp = connect_zone(tmp,(struct fb*)zone,&has_merged);
 	   		if(has_merged){
-	   			tmp = connect_zone(tmp,tmp->next,&has_merged);
+	   			//tmp = connect_zone(tmp,tmp->next,&has_merged);
 	   		}
 	   		else {
 	   			tmp = connect_zone((struct fb*)zone,tmp->next,&has_merged);
@@ -232,7 +243,7 @@ void mem_fit(mem_fit_function_t* mff) {
 //-------------------------------------------------------------
 struct fb* mem_first_fit(struct fb* head, size_t size) {	
    
-   size += sizeof(struct bb*); 		// taille totale : size + taille d'une structure bb
+   size += sizeof(struct bb); 		// taille totale : size + taille d'une structure bb
 
    struct fb *temp;
    struct fb* first_fit = NULL;
@@ -252,7 +263,7 @@ struct fb* mem_first_fit(struct fb* head, size_t size) {
 //-------------------------------------------------------------
 struct fb* mem_best_fit(struct fb* head, size_t size) {
 	
-	size += sizeof(struct bb*); 		// taille totale : size + taille d'une structure bb
+	size += sizeof(struct bb); 		// taille totale : size + taille d'une structure bb
 
    struct fb *temp;
 	struct fb* best_fit = NULL;
@@ -277,7 +288,7 @@ struct fb* mem_best_fit(struct fb* head, size_t size) {
 //-------------------------------------------------------------
 struct fb* mem_worst_fit(struct fb* head, size_t size) {
 
-   size += sizeof(struct bb*); 		// taille totale : size + taille d'une structure bb
+   size += sizeof(struct bb); 		// taille totale : size + taille d'une structure bb
 
    struct fb *temp;
    struct fb* worst_fit = NULL;
