@@ -6,15 +6,6 @@
 
 #define ALIGN 8
 
-//-------------------------------------------------------------
-// get_pzl
-//-------------------------------------------------------------
-/*struct fb *get_pzl(){
-   struct fb** pzl = (struct fb**)((char*)get_memory_adr() + sizeof(mem_fit_function_t *));    // adresse du pointeur de la première zone libre
-   *pzl = (struct fb*)((char *)get_memory_adr() + sizeof(mem_fit_function_t *) + sizeof(struct fb*));    // on fait pointer pzl vers la première zone libre
-   return *pzl;
-}*/
-
 
 //-------------------------------------------------------------
 // mem_init
@@ -26,26 +17,26 @@ void mem_init() {
    mem_fit(mem_first_fit);
 
    // Le deuxième élément est le pointeur vers la 1ere zone libre
-   variables->pzl = (struct fb*)((char *)get_memory_adr() + sizeof(global_s));
+   variables->ffz = (struct fb*)((char *)get_memory_adr() + sizeof(global_s));
 
    // le reste de la mémoire est une zone libre
-   variables->pzl->size = get_memory_size() - sizeof(global_s*) - sizeof(struct fb);
-   variables->pzl->next = NULL ;
+   variables->ffz->size = get_memory_size() - sizeof(global_s);
+   variables->ffz->next = NULL ;
 }
 
 //-------------------------------------------------------------
 // mem_alloc
 //-------------------------------------------------------------
 
-/*void modif_chainage(struct fb *pzl, struct bb* debut_adr_alloc, struct fb* prochaine_zl){
-	struct fb* tmp = pzl;
-    struct bb *debut_adr_alloc;
+/*void modif_chainage(struct fb *ffz, struct bb* new_alloc_zone, struct fb* prochaine_zl){
+	struct fb* tmp = ffz;
+    struct bb *new_alloc_zone;
 
-	if (pzl == (struct fb*)debut_adr_alloc){
-		pzl = prochaine_zl;
+	if (ffz == (struct fb*)new_alloc_zone){
+		ffz = prochaine_zl;
 	}else {
 		while (tmp != NULL){
-			if (tmp->next == (struct fb*)debut_adr_alloc){
+			if (tmp->next == (struct fb*)new_alloc_zone){
 				tmp->next = prochaine_zl;
 			}
 			else {
@@ -58,64 +49,135 @@ void mem_init() {
 
 void* mem_alloc(size_t size) {
    global_s *variables = (global_s *)get_memory_adr();
-   int reste = size % ALIGN;
-   if( reste != 0){
-	   size += ALIGN - reste;
-   }
-   struct fb *debut_adr_libre = variables->fonction_alloc(variables->pzl, size);
 
-   if(debut_adr_libre == NULL){
+   // la taille à allouer doit être un multiple de l'alignement
+   int rest = size % ALIGN;
+   if( rest != 0){
+	   size += ALIGN - rest;
+   }
+
+   // on récupère l'adresse de la zone libre en fonction de la stratégie d'allocation
+   struct fb *free_zone = variables->alloc_fun(variables->ffz, size);
+
+   if(free_zone == NULL){
 	   return NULL;
    }
 
-   struct fb* tmp = variables->pzl;
-   struct bb* debut_adr_alloc;
-   
-   if(debut_adr_libre->size > size + sizeof(struct bb) + sizeof(struct fb)){
-      int taille_libre = debut_adr_libre->size;
+   size_t free_zone_size = free_zone->size;
+   struct fb* tmp = variables->ffz; // pour modifier le chaînage des zones libres
+   struct bb* new_alloc_zone;
 
-     debut_adr_alloc = (struct bb*)debut_adr_libre;
-     debut_adr_alloc->size = size + sizeof(struct bb);
-     taille_libre -= debut_adr_alloc->size;
-	   debut_adr_libre = (struct fb*)((char *)debut_adr_alloc + debut_adr_alloc->size);
-     debut_adr_libre->size = taille_libre;
+   if(free_zone_size >= size + sizeof(struct bb) + sizeof(struct fb)){
+      // si la zone libre est suffisamment grande, on veut garder le suplus comme zone libre
 
-	   //modif_chainage(variables->pzl, debut_adr_alloc, debut_adr_libre);
-	   if (variables->pzl == (struct fb*)debut_adr_alloc){
-		   variables->pzl = debut_adr_libre;
-	   }else {
-		   while (tmp != NULL && tmp->next == (struct fb*)debut_adr_alloc){
-            tmp = tmp->next;
-		   }
-       tmp->next = debut_adr_libre; // tmp ne peut pas être nul avant d'avoir trouvé debut_adr_alloc
+      // création de la zone occupée
+      new_alloc_zone = (struct bb*)free_zone;
+      new_alloc_zone->size = size + sizeof(struct bb);
+
+      // maj de la zone libre
+	   free_zone = (struct fb*)((char *)new_alloc_zone + new_alloc_zone->size);
+      free_zone->size = free_zone_size - new_alloc_zone->size;
+
+      // maj du chainage des zones libres
+	   if (variables->ffz == (struct fb*)new_alloc_zone){  // si la zone libre était la première de la liste
+		   variables->ffz = free_zone;
 	   }
+   	else {
+	      // sinon on cherche l'ancienne zone libre (càd new_alloc_zone)
+			while (tmp != NULL && tmp->next == (struct fb*)new_alloc_zone){
+	         tmp = tmp->next;
+			}
+	      tmp->next = free_zone; // tmp ne peut pas être nul avant d'avoir trouvé new_alloc_zone
+		   }
    }
-   else{
-     debut_adr_alloc = (struct bb*) debut_adr_libre;
-     debut_adr_alloc->size = size + sizeof(struct bb*);
-	   //modif_chainage(variables->pzl, debut_adr_alloc, debut_adr_libre);
-	   if (variables->pzl == (struct fb*)debut_adr_alloc){
-		   variables->pzl = variables->pzl->next;
-	   }else {
-      while (tmp != NULL && tmp->next == (struct fb*)debut_adr_alloc){
+   else{  // la zone libre devient une zone occupée
+      new_alloc_zone = (struct bb*) free_zone;
+      new_alloc_zone->size = free_zone_size;
+
+      // maj chaînage
+	   if (variables->ffz == (struct fb*)new_alloc_zone){ // première zone libre
+		   variables->ffz = variables->ffz->next;
+	   }
+      else {
+         while (tmp != NULL && tmp->next == (struct fb*)new_alloc_zone){
             tmp = tmp->next;
-       }
-       tmp->next = tmp->next->next; // tmp ne peut pas être nul avant d'avoir trouvé debut_adr_alloc
-     }
-	  
+         }
+      tmp->next = tmp->next->next; // tmp ne peut pas être nul avant d'avoir trouvé new_alloc_zone
+      }
    }
 
+   return (void *)((char *)new_alloc_zone + sizeof(struct bb));
+   //return (void *)(new_alloc_zone + 1);
+}
 
-   return (void *)((char *)debut_adr_alloc + sizeof(struct bb));
-   //return (void *)(debut_adr_alloc + 1);
 
+//-------------------------------------------------------------
+// connect_zone
+//-------------------------------------------------------------
+struct fb* connect_zone(struct fb* previous_zone, struct fb* next_zone, int* has_merged){
+
+	if((struct fb*)((char*)previous_zone + previous_zone->size) == next_zone){ // fusion entre zone et next_zone
+		int new_size = previous_zone->size + next_zone->size;
+		previous_zone->size = new_size;
+		*has_merged = 1;
+	}
+	else{
+		previous_zone->next = next_zone;
+		*has_merged = 0;
+	}
+	return previous_zone;
 }
 
 //-------------------------------------------------------------
 // mem_free
 //-------------------------------------------------------------
 void mem_free(void* zone) {
+	zone -= sizeof(struct bb);
+	global_s *variables = (global_s *)get_memory_adr();
 
+   struct fb* tmp;
+   int is_zone_found = 0;
+   int has_merged;
+
+   //Cas où la mem est pleine
+   if(variables->ffz == NULL){
+   	struct fb* new_free_zone = (struct fb*)zone;
+		new_free_zone->next = NULL;
+    new_free_zone->size = ((struct bb*)zone)->size;
+		variables->ffz = new_free_zone;
+   }
+   //Pourquoi ? Comment savoir qu'il n'y a pas de zone occupée entre la zone a free et la 1ere zone libre ? -> réponse : grace a connect_zone()
+   else if(variables->ffz > (struct fb*) zone){
+     //A quel moment on supprime les données que contient la zone ?
+     //pourquoi (struct fb*)zone et pas (struct bb*)zone
+   	variables->ffz = connect_zone((struct fb*)zone,variables->ffz,&has_merged);
+   }
+   else{
+   	tmp = variables->ffz;
+
+   	while(!is_zone_found){	// invariant : tmp != NULL
+   		if(tmp->next == NULL){	// zone se situe après tmp
+   			tmp = connect_zone(tmp,(struct fb*)zone,&has_merged);
+   			is_zone_found = 1;
+   		}
+
+
+	   	else if(tmp->next != NULL && tmp->next < (struct fb*) zone){
+	   		tmp = tmp->next;
+	   	}
+
+	   	else{	// zone se situe entre tmp et tmp->next
+	   		tmp = connect_zone(tmp,(struct fb*)zone,&has_merged);
+	   		if(has_merged){
+	   			tmp = connect_zone(tmp,tmp->next,&has_merged);
+	   		}
+	   		else {
+	   			tmp = connect_zone((struct fb*)zone,tmp->next,&has_merged);
+	   		}
+	   		is_zone_found = 1;
+	   	}
+	   }
+   }
 }
 
 //-------------------------------------------------------------
@@ -123,154 +185,117 @@ void mem_free(void* zone) {
 // mem_show
 //-------------------------------------------------------------
 void mem_show(void (*print)(void *, size_t, int free)) {
-  /*struct fb *head = get_pzl();
-   while (head->next !=NULL);*/
    global_s *variables = (global_s *)get_memory_adr();
-   int taille_mem_lue = sizeof(global_s);
-   struct fb* tmp = variables->pzl;
-   int est_libre;
+
+   int mem_readed = sizeof(global_s);
+
+   struct fb* tmp = variables->ffz;
+   int is_free;
 
    void *adr_mem = (void *)((char *)get_memory_adr() + sizeof(struct global_s));
-   //struct fb* tmp = variables->pzl;
-   while (taille_mem_lue < get_memory_size()){ // tant qu'on a pas exploré toute la mémoire
-	   if(tmp == NULL || (struct fb*)adr_mem != tmp){  // s'il ce n'est pas une zone libre
-		   est_libre = 0;
-       //size_t taille = (*adr_mem;
-       (*print)(adr_mem,((struct fb*)adr_mem)->size,est_libre);
-       taille_mem_lue += ((struct fb*)adr_mem)->size;
-       adr_mem = (char *)adr_mem + ((struct fb*)adr_mem)->size;
-      // adr_mem = (char *)adr_mem + 
+
+   while (mem_readed < get_memory_size()){ // tant qu'on a pas exploré toute la mémoire
+	   if(tmp == NULL || (struct fb*)adr_mem != tmp){  // si l'adr courante n'est pas une zone libre
+			is_free = 0;
+
+       	// appel de la fonction d'affichage
+       	(*print)(adr_mem,((struct bb*)adr_mem)->size,is_free);
+
+       	// maj de la taille de la mémoire lue
+       	mem_readed += ((struct bb*)adr_mem)->size;
+
+       	// maj de l'adresse courante
+       	adr_mem = (void *)((char *)adr_mem + ((struct bb*)adr_mem)->size);
 	   }
 	   else {	// si on est au début d'une zone libre
-		   est_libre = 1;
-      
-      
-       //size_t taille = (*adr_mem;
-       (*print)(adr_mem,((struct bb*)adr_mem)->size,est_libre);
-       taille_mem_lue += ((struct fb*)adr_mem)->size;
-       adr_mem = (char *)adr_mem + ((struct bb*)adr_mem)->size;
-       tmp = tmp->next;
+			is_free = 1;
 
+       	// appel de la fonction d'affichage
+       	(*print)(adr_mem,((struct fb*)adr_mem)->size,is_free);
+
+       	// maj de la taille dela mémoire lue
+       	mem_readed += ((struct fb*)adr_mem)->size;
+
+       	// maj de l'adresse courante
+       	adr_mem = (char *)adr_mem + ((struct fb*)adr_mem)->size;
+       	tmp = tmp->next;
 	   }
-
-
-	   /*if (tmp->next != NULL){
-		   struct bb* zone_occup = (struct bb*)((char *)tmp + tmp->size)
-	   }*/
    }
-   //(*print)(variables->pzl,)
 }
 
 //-------------------------------------------------------------
 // mem_fit
 //-------------------------------------------------------------
 void mem_fit(mem_fit_function_t* mff) {
-	 global_s *variables = (global_s *)get_memory_adr();
-	 variables->fonction_alloc = mff;
+	global_s *variables = (global_s *)get_memory_adr();
+	variables->alloc_fun = mff;
 }
 
 //-------------------------------------------------------------
 // Stratégies d'allocation
 //-------------------------------------------------------------
 struct fb* mem_first_fit(struct fb* head, size_t size) {
-   /* A COMPLETER */
 
-   if(head == NULL) {
-	   return NULL;
-   }
-
-  // size += sizeof(struct bb*); 		// taille totale : size + taille d'une structure bb
+   size += sizeof(struct bb*); 		// taille totale : size + taille d'une structure bb
 
    struct fb *temp;
-   struct fb* adresse_allouee = NULL;
+   struct fb* first_fit = NULL;
    temp = head;
    while(temp != NULL){
-	   if(temp->size >= size + sizeof(struct bb)){
-	      adresse_allouee = temp;
-		  break;
+	   if(temp->size >= size){
+	      first_fit = temp;
+		  	break;
 	   }
 	   else{
-		  temp = temp->next;
+		  	temp = temp->next;
 	   }
    }
-   return adresse_allouee;
+   return first_fit;
 }
 
 //-------------------------------------------------------------
 struct fb* mem_best_fit(struct fb* head, size_t size) {
-	if(head == NULL) {
- 	   return NULL;
-    }
 
-    size += sizeof(struct bb*); 		// taille totale : size + taille d'une structure bb
+	size += sizeof(struct bb*); 		// taille totale : size + taille d'une structure bb
 
-    struct fb *temp, *zone_libre;
-    struct fb* adresse_allouee = NULL;
-	struct fb* prev_best_fit = NULL;
-    temp = head;
-    while(temp->next != NULL){
- 	   if(temp->next->size >= size){
- 		   if ((prev_best_fit->next == NULL) || (prev_best_fit->next->size > temp->next->size)){
- 			   prev_best_fit = temp;
+   struct fb *temp;
+	struct fb* best_fit = NULL;
+
+   temp = head;
+   while(temp != NULL){
+ 	   if(temp->size >= size){
+ 		   if ((best_fit == NULL) || (best_fit->size > temp->size)){
+ 			   best_fit = temp;
  		   }
-		   else if (prev_best_fit->next->size == size){
-			   break;
+		   else if (best_fit->size == size){
+				break;
 		   }
  	   }
  	   else{
  		   temp = temp->next;
  	   }
-    }
-	if (prev_best_fit != NULL){
-		if(prev_best_fit->next->size - size >= sizeof(struct fb*)){
-			adresse_allouee = prev_best_fit->next;
-			zone_libre = prev_best_fit->next + size;
-			zone_libre->size = temp->next->size - size;
-			zone_libre->next = prev_best_fit->next->next;
-			prev_best_fit->next = zone_libre;
-		}
-		else {
-			adresse_allouee = prev_best_fit->next;
-		}
-	}
-
-    return adresse_allouee;
-
+   }
+   return best_fit;
 }
+
 //-------------------------------------------------------------
 struct fb* mem_worst_fit(struct fb* head, size_t size) {
-	if(head == NULL) {
- 	  return NULL;
-    }
 
-    size += sizeof(struct bb*); 		// taille totale : size + taille d'une structure bb
+   size += sizeof(struct bb*); 		// taille totale : size + taille d'une structure bb
 
-    struct fb *temp, *zone_libre;
-    struct fb* adresse_allouee = NULL;
-    struct fb* worst_fit = NULL;
-    temp = head;
-    while(temp->next != NULL){
- 	  if(temp->next->size >= size){
- 		  if ((worst_fit == NULL) || (worst_fit->size < temp->next->size)){
- 			  worst_fit = temp->next;
+   struct fb *temp;
+   struct fb* worst_fit = NULL;
+
+   temp = head;
+   while(temp != NULL){
+ 	  	if(temp->size >= size){
+ 		  	if ((worst_fit == NULL) || (worst_fit->size < temp->size)){
+ 			  	worst_fit = temp;
  		  }
- 	  }
- 	  else{
- 		  temp = temp->next;
- 	  }
-    }
-    if (worst_fit != NULL){
- 	   if(worst_fit->size - size >= sizeof(struct fb*)){
- 		   adresse_allouee = worst_fit;
- 		   zone_libre = worst_fit + size;
-		   zone_libre->size = temp->next->size - size;
- 		   zone_libre->next = worst_fit->next;
- 		   worst_fit = zone_libre;
- 	   }
- 	   else {
- 		   adresse_allouee = worst_fit;
- 	   }
-    }
-
-    return adresse_allouee;
+ 	  	}
+ 	  	else{
+ 		  	temp = temp->next;
+ 	  	}
+   }
+   return worst_fit;
 }

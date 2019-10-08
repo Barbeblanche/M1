@@ -12,8 +12,8 @@ struct fb;
 typedef struct fb* (mem_fit_function_t)(struct fb *, size_t);
 
 typedef struct global_s{
-	mem_fit_function_t *fonction_alloc;
-	struct fb *pzl;
+	mem_fit_function_t *alloc_fun;
+	struct fb *ffz;
 }global_s;
 
 // Choix de la fonction d'allocation
