@@ -161,6 +161,7 @@ struct fb* suppr_zone(struct fb* old_zone, struct fb* head){
 
 /*-------------------------- version test -----------------------------------*/
 
+
 void* mem_alloc(size_t size) {
    global_s *variables = (global_s *)get_memory_adr();
 
@@ -183,7 +184,8 @@ void* mem_alloc(size_t size) {
 
    struct bb* new_alloc_zone;
    size_t free_zone_size = free_zone->size; 
-   variables->ffz = suppr_zone(free_zone, variables->ffz);  // il est plus facile de supprimer le maillon et d'en réinsérer un modifé si nécessaire
+
+   variables->ffz = suppr_zone(free_zone, variables->ffz);  // il est plus facile de supprimer le maillon, et d'en réinsérer un modifé si nécessaire
 
    if(free_zone_size >= size + sizeof(struct bb) + sizeof(struct fb)){  // si la zone libre est suffisamment grande, le surplus reste libre
 
