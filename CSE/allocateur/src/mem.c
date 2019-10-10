@@ -24,7 +24,7 @@ void mem_init() {
 }
 
 struct fb* add_zone(struct fb* new_zone, struct fb* head){
-   
+
    if(head == NULL){
       head = new_zone;
       new_zone->next = NULL;  // indispensable afin de préserver la mémoire
@@ -85,7 +85,7 @@ void* mem_alloc(size_t size) {
    }
 
    struct bb* new_alloc_zone;
-   size_t free_zone_size = free_zone->size; 
+   size_t free_zone_size = free_zone->size;
 
    variables->ffz = suppr_zone(free_zone, variables->ffz);  // il est plus facile de supprimer le maillon, et d'en réinsérer un modifé si nécessaire
 
@@ -125,10 +125,10 @@ void* mem_alloc(size_t size) {
 
    if((struct bb*)ptr->size == 0){
       mem_free(ptr);
-      ptr = NULL;  
+      ptr = NULL;
    }
    else if( ((struct bb)ptr->size - sizeof(struct bb) > size) && (too_much_size >= sizeof(struct fb)) ){  // on veut réduire la taille de ptr, et c'est possible
-         
+
       // maj de la zone occupée
       (struct bb*)ptr->size = size + sizeof(struct bb);
 
@@ -185,14 +185,14 @@ struct fb* merge_zone(struct fb* zone, struct fb* head){
       zone->size = new_size;
       zone->next = tmp->next->next;
    }
-   return head; 
+   return head;
 }
 
 //-------------------------------------------------------------
 // mem_free
 //-------------------------------------------------------------
 void mem_free(void* zone) {
-   
+
    zone -= sizeof(struct bb); // on se place au début de la structure de la zone
 
    global_s *variables = (global_s *)get_memory_adr();
@@ -258,8 +258,8 @@ void mem_fit(mem_fit_function_t* mff) {
 // Stratégies d'allocation
 //-------------------------------------------------------------
 
-struct fb* mem_first_fit(struct fb* head, size_t size) { 
-   
+struct fb* mem_first_fit(struct fb* head, size_t size) {
+
    size += sizeof(struct bb);       // taille totale : size + taille d'une structure bb
 
    struct fb *temp;
@@ -279,7 +279,7 @@ struct fb* mem_first_fit(struct fb* head, size_t size) {
 
 //-------------------------------------------------------------
 struct fb* mem_best_fit(struct fb* head, size_t size) {
-   
+
    size += sizeof(struct bb);       // taille totale : size + taille d'une structure bb
 
   struct fb *temp;
@@ -295,9 +295,7 @@ struct fb* mem_best_fit(struct fb* head, size_t size) {
             break;
          }
       }
-      else{
-         temp = temp->next;
-      }
+      temp = temp->next;
    }
    return best_fit;
 }
@@ -317,9 +315,7 @@ struct fb* mem_worst_fit(struct fb* head, size_t size) {
             worst_fit = temp;
         }
       }
-      else{
-         temp = temp->next;
-      }
+      temp = temp->next;
    }
    return worst_fit;
 }

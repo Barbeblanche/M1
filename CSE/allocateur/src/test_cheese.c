@@ -1,4 +1,5 @@
 #include "mem.h"
+#include "mem_os.h"
 #include "common.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -57,16 +58,26 @@ void alloc_fun(int n) {
 	my_free(&b);
 }
 
-int main(int argc, char *argv[]) {
-	mem_init();
-	fprintf(stderr, "Test réalisant récursivement une allocation en gruyère selon le modèle d'appel de fibonacci.\n"
-			"Définir DEBUG à la compilation pour avoir une sortie un peu plus verbeuse."
- 		"\n");
+void test_main(){
 	for (int i=0; i<NB_TESTS; i++) {
 		debug("Issuing test number %d\n", i);
 		alloc_fun(6);
 		reset();
 	}
+}
+
+int main(int argc, char *argv[]) {
+	mem_init();
+	fprintf(stderr, "Test réalisant récursivement une allocation en gruyère selon le modèle d'appel de fibonacci.\n"
+			"Définir DEBUG à la compilation pour avoir une sortie un peu plus verbeuse."
+ 		"\n");
+	/*test_main();
+  debug("// \nChangement de stratégie d'allocation : mem_best_fit\n// \n");
+  mem_fit(mem_best_fit);
+  test_main();*/
+  debug("// \nChangement de stratégie d'allocation : mem_worst_fit\n// \n");
+  mem_fit(mem_worst_fit);
+  test_main();
 
 	// TEST OK
 	return 0;

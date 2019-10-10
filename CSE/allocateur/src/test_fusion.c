@@ -1,4 +1,5 @@
 #include "mem.h"
+#include "mem_os.h"
 #include "common.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -58,18 +59,10 @@ static void free5(void **ptr) {
 	}
 }
 
+static void test_main(){
+  void *ptr[5];
 
-
-int main(int argc, char *argv[]) {
-
-    //printf("%ld", sizeof(void*));
-	void *ptr[5];
-
-	mem_init();
-	fprintf(stderr, "Test réalisant divers cas de fusion (avant, arrière et double\n"
-			"Définir DEBUG à la compilation pour avoir une sortie un peu plus verbeuse."
- 		"\n");
-	for (int i=0; i<NB_TESTS; i++) {
+  for (int i=0; i<NB_TESTS; i++) {
 		debug("Fusion avant\n");
 		alloc5(ptr);
 		my_free(&ptr[2]);
@@ -92,7 +85,25 @@ int main(int argc, char *argv[]) {
 		ptr[1] = checked_alloc(3*MAX_ALLOC);
 		free5(ptr);
 	}
+}
 
+
+
+int main(int argc, char *argv[]) {
+
+
+	mem_init();
+	fprintf(stderr, "Test réalisant divers cas de fusion (avant, arrière et double\n"
+			"Définir DEBUG à la compilation pour avoir une sortie un peu plus verbeuse."
+ 		"\n");
+
+  test_main();
+  debug("// \nChangement de stratégie d'allocation : mem_best_fit\n// \n");
+  mem_fit(mem_best_fit);
+  test_main();
+  debug("// \nChangement de stratégie d'allocation : mem_worst_fit\n// \n");
+  mem_fit(mem_worst_fit);
+  test_main();
 	// TEST OK
     printf("TEST OK!!\n");
 	return 0;

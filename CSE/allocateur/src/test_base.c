@@ -1,4 +1,5 @@
 #include "mem.h"
+#include "mem_os.h"
 #include "common.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -30,18 +31,35 @@ static int make_test() {
 	return nb_alloc;
 }
 
-int main(int argc, char *argv[]) {
+void test_main(){
 	int nb_alloc;
 	nb_alloc = 0;
-	mem_init();
-	fprintf(stderr, "Test réalisant des series d'allocations / désallocations en ordre LIFO\n"
-			"Définir DEBUG à la compilation pour avoir une sortie un peu plus verbeuse."
- 		"\n");
 	nb_alloc = make_test();
 	for (int i=0; i<NB_TESTS; i++) {
 		// Teste si non idempotent !
 		assert (make_test() == nb_alloc);
 	}
+}
+
+int main(int argc, char *argv[]) {
+	/*int nb_alloc;
+	nb_alloc = 0;*/
+	mem_init();
+	fprintf(stderr, "Test réalisant des series d'allocations / désallocations en ordre LIFO\n"
+			"Définir DEBUG à la compilation pour avoir une sortie un peu plus verbeuse."
+ 		"\n");
+	/*nb_alloc = make_test();
+	for (int i=0; i<NB_TESTS; i++) {
+		// Teste si non idempotent !
+		assert (make_test() == nb_alloc);
+	}*/
+	test_main();
+  debug("// \nChangement de stratégie d'allocation : mem_best_fit\n// \n");
+  mem_fit(mem_best_fit);
+  test_main();
+  debug("// \nChangement de stratégie d'allocation : mem_worst_fit\n// \n");
+  mem_fit(mem_worst_fit);
+  test_main();
 
 	// TEST OK
 	return 0;
