@@ -123,13 +123,13 @@ void* mem_alloc(size_t size) {
 */
 
 struct fb* add_zone(struct fb* new_zone, struct fb* head){
-   new_zone->next = NULL;  // indispensable afin de préserver la mémoire
    
    if(head == NULL){
       head = new_zone;
+      new_zone->next = NULL;  // indispensable afin de préserver la mémoire
    }
    else if (head > new_zone){ // première zone libre
-      new_zone->next = head->next;
+      new_zone->next = head;
       head = new_zone;
    }
    else {
@@ -310,7 +310,7 @@ struct fb* merge_zone(struct fb* zone, struct fb* head){
 
    struct fb* tmp = head;
 
-   if(tmp != zone){ // il peut y avoir une fusion avant
+   if(tmp != zone){ // il y peut-être besoin d'une fusion avant
       while(tmp->next != NULL && tmp->next < zone){
          tmp = tmp->next;
       }
@@ -318,6 +318,7 @@ struct fb* merge_zone(struct fb* zone, struct fb* head){
       if((struct fb*)((char*)tmp + tmp->size) == zone){  // fusion avec la zone avant
          int new_size = tmp->size + zone->size;
          tmp->size = new_size;
+         tmp->next = zone->next;
          zone = tmp; // au cas où la zone suivante doit fusionner aussi
       }
    }
@@ -333,7 +334,7 @@ struct fb* merge_zone(struct fb* zone, struct fb* head){
 //-------------------------------------------------------------
 // mem_free
 //-------------------------------------------------------------
-void mem_free(void* zone) {
+void mem_free2(void* zone) {
 	zone -= sizeof(struct bb);
 	global_s *variables = (global_s *)get_memory_adr();
 
@@ -383,7 +384,7 @@ void mem_free(void* zone) {
 }
 
 
-void mem_free2(void* zone) {
+void mem_free(void* zone) {
    // on récupère le début de la structure de zone
    zone -= sizeof(struct bb);
 
