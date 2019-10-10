@@ -77,6 +77,8 @@ void* mem_alloc(size_t size) {
       size += ALIGN - rest;
    }
 
+   size += sizeof(struct bb);  // taille totale : size + taille d'une structure bb
+
    // on récupère l'adresse de la zone libre en fonction de la stratégie d'allocation
    struct fb *free_zone = variables->alloc_fun(variables->ffz, size);
 
@@ -121,7 +123,8 @@ void* mem_alloc(size_t size) {
    }
 
    ptr -= sizeof(struct bb);  // on se place au début de la structure de la zone
-   size_t too_much_size = (size_t)((char*)((struct bb)ptr->size) - size);
+
+   size_t too_much_size = (struct bb*)ptr->size - size;
 
    if((struct bb*)ptr->size == 0){
       mem_free(ptr);
@@ -141,22 +144,31 @@ void* mem_alloc(size_t size) {
 
    }
    else {   // on veut agrandir la taille de ptr
+/*
+      Nous voulions séparer les cas suivants :
 
-      // on veut d'abord pouvoir étendre la zone
-      struct fb* new_zone = extend_right((struct fb*)ptr, size + sizeof(struct bb), variables->ffz);
 
-      if(new_zone == NULL && (new_zone = mem_alloc(size)) != NULL){  // sinon on essaie de faire une allocation normale
+         si l’espace mémoire peut être agrandi à droite :
+            il faut actualiser la taille de la zone ;
+            supprimer la zone libre après ;
+            réinsérer une zone libre si l’espace tait suffisamment grand
+         si c’est insuffisant  mais que l’espace mémoire peut être aussi (ou seulement)  agrandi à gauche :  il faut actualiser l’adresse de la zone et la taille ;
+            copier les anciennes valeurs de la zone dans la nouvelle ;
+            supprimer les anciennes zones libres et en ajouter une s’il y a trop d’espace ;
+*/
+
+      // sinon, on appelle mem_alloc avec la nouvelle taille :
+ /*     if(new_zone == NULL && (new_zone = mem_alloc(size)) != NULL){  // sinon on essaie de faire une allocation normale
          mem_cpy(new_zone, ptr, sizeof((struct fb*)ptr));
          mem_free(ptr); // l'ancienne zone qu'occupait ptr est à nouveau libre
-         ptr = (void *)new_zone; // o récupère la nouvelle adresse
+         ptr = (void *)new_zone; // on récupère la nouvelle adresse
       }
       else {
          // la taille ne peut être agrandie, que faire ?
       }
    }
    return ptr;
-}
-*/
+}*/
 
 
 //-------------------------------------------------------------
@@ -194,6 +206,10 @@ struct fb* merge_zone(struct fb* zone, struct fb* head){
 void mem_free(void* zone) {
 
    zone -= sizeof(struct bb); // on se place au début de la structure de la zone
+
+   if(zone == NULL){
+      return;
+   }
 
    global_s *variables = (global_s *)get_memory_adr();
 
@@ -258,9 +274,13 @@ void mem_fit(mem_fit_function_t* mff) {
 // Stratégies d'allocation
 //-------------------------------------------------------------
 
+<<<<<<< HEAD
 struct fb* mem_first_fit(struct fb* head, size_t size) {
 
    size += sizeof(struct bb);       // taille totale : size + taille d'une structure bb
+=======
+struct fb* mem_first_fit(struct fb* head, size_t size) {
+>>>>>>> c133a2ebb0fa3bb6f1a0647e8aa08913d5456798
 
    struct fb *temp;
    struct fb* first_fit = NULL;
@@ -279,8 +299,11 @@ struct fb* mem_first_fit(struct fb* head, size_t size) {
 
 //-------------------------------------------------------------
 struct fb* mem_best_fit(struct fb* head, size_t size) {
+<<<<<<< HEAD
 
    size += sizeof(struct bb);       // taille totale : size + taille d'une structure bb
+=======
+>>>>>>> c133a2ebb0fa3bb6f1a0647e8aa08913d5456798
 
   struct fb *temp;
    struct fb* best_fit = NULL;
@@ -302,8 +325,6 @@ struct fb* mem_best_fit(struct fb* head, size_t size) {
 
 //-------------------------------------------------------------
 struct fb* mem_worst_fit(struct fb* head, size_t size) {
-
-   size += sizeof(struct bb);       // taille totale : size + taille d'une structure bb
 
    struct fb *temp;
    struct fb* worst_fit = NULL;
