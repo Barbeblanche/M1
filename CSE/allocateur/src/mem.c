@@ -144,7 +144,7 @@ void* mem_alloc(size_t size) {
 
    }
    else {   // on veut agrandir la taille de ptr
-/*
+
       Nous voulions séparer les cas suivants :
 
 
@@ -274,13 +274,9 @@ void mem_fit(mem_fit_function_t* mff) {
 // Stratégies d'allocation
 //-------------------------------------------------------------
 
-<<<<<<< HEAD
+
 struct fb* mem_first_fit(struct fb* head, size_t size) {
 
-   size += sizeof(struct bb);       // taille totale : size + taille d'une structure bb
-=======
-struct fb* mem_first_fit(struct fb* head, size_t size) {
->>>>>>> c133a2ebb0fa3bb6f1a0647e8aa08913d5456798
 
    struct fb *temp;
    struct fb* first_fit = NULL;
@@ -299,11 +295,6 @@ struct fb* mem_first_fit(struct fb* head, size_t size) {
 
 //-------------------------------------------------------------
 struct fb* mem_best_fit(struct fb* head, size_t size) {
-<<<<<<< HEAD
-
-   size += sizeof(struct bb);       // taille totale : size + taille d'une structure bb
-=======
->>>>>>> c133a2ebb0fa3bb6f1a0647e8aa08913d5456798
 
   struct fb *temp;
    struct fb* best_fit = NULL;
