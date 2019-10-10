@@ -123,12 +123,8 @@ void* mem_alloc(size_t size) {
    }
 
    ptr -= sizeof(struct bb);  // on se place au début de la structure de la zone
-<<<<<<< HEAD
 
    size_t too_much_size = (struct bb*)ptr->size - size;
-=======
-   size_t too_much_size = (size_t)((char*)((struct bb)ptr->size) - size);
->>>>>>> f99aa8c12e10d57d8497d9c7a4d4149d6a9a3683
 
    if((struct bb*)ptr->size == 0){
       mem_free(ptr);
@@ -148,7 +144,7 @@ void* mem_alloc(size_t size) {
 
    }
    else {   // on veut agrandir la taille de ptr
-/*
+
       Nous voulions séparer les cas suivants :
 
 
