@@ -5,6 +5,8 @@ public abstract class Forme {
 	float t;
 	float x;
 	float y;
+    int etape;
+    
 	public Forme(MachineTrace m) {
 		this.m = m;
 	}
@@ -16,7 +18,12 @@ public abstract class Forme {
 	void fixerTaille(int t) {
 		this.t=(float)t;
 	}
+    void fixerEtape(int e) {
+		this.etape=e;
+	}
 	
 	abstract void dessiner();
+    
+    abstract void avancer();
 	
 }

@@ -1,8 +1,8 @@
 package formes_geo;
 
-public class Carre extends Forme {
+public class CarrePulsant extends FormePulsante {
 
-	public Carre(MachineTrace m) {
+	public CarrePulsant(MachineTrace m) {
 		super(m);
 		// TODO Auto-generated constructor stub
 	}
@@ -22,7 +22,4 @@ public class Carre extends Forme {
 		m.lever();
 	}
     
-    void avancer(){ //par default une forme quand elle avance ne fait rien à part dessiner, on override si besoin dasn les classes filles
-        this.dessiner();
-    }
 }

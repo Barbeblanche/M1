@@ -1,8 +1,8 @@
 package formes_geo;
 
-public class Cercle extends Forme{
+public class CerclePulsant extends FormePulsante{
 
-	public Cercle(MachineTrace m) {
+	public CerclePulsant(MachineTrace m) {
 		super(m);
 		// TODO Auto-generated constructor stub
 	}
@@ -26,8 +26,5 @@ public class Cercle extends Forme{
 		
 		m.lever();
 	}
-    
-    void avancer(){ //par default une forme quand elle avance ne fait rien à part dessiner, on override si besoin dasn les classes filles
-        this.dessiner();
-    }
+
 }
