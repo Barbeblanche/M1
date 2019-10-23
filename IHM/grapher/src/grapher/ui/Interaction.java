@@ -2,6 +2,7 @@ package grapher.ui;
 
 import javafx.event.EventHandler;
 import javafx.geometry.Point2D;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 
@@ -10,10 +11,18 @@ public class Interaction implements EventHandler<MouseEvent> {
 	State state;
 	GrapherCanvas g;
 	Point2D p;
-	
+	Point2D p2;
 	public Interaction(GrapherCanvas g) {
 		this.state = State.IDLE;
 		this.g = g;
+	}
+	
+	public void drawFeedBack(GraphicsContext g) {
+		switch(state) {
+			case SELECTING:
+				g.strokeRect(p.getX(),p.getY(),p2.getX()-p.getX(),p2.getY()-p.getY());
+		}
+			
 	}
 	
 	@Override
@@ -69,12 +78,16 @@ public class Interaction implements EventHandler<MouseEvent> {
 			break;
 		case SELECTING:
 			switch(e.getEventType().getName()) {
+			
 				case "MOUSE_RELEASED":
-					Point2D p2 = new Point2D(e.getX(),e.getY());
+					p2 = new Point2D(e.getX(),e.getY());
 					g.zoom(p,p2);
 					state = State.IDLE;
+					g.redraw();
 					break;
 				case "MOUSE_DRAGGED":
+					p2 = new Point2D(e.getX(),e.getY());
+					g.redraw();
 					break;
 			}
 			break;

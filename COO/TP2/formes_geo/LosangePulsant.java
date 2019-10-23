@@ -1,19 +1,17 @@
 package formes_geo;
 
-public class Carre extends Forme {
+public class LosangePulsant extends FormePulsante{
 
-	public Carre(MachineTrace m) {
+	public LosangePulsant(MachineTrace m) {
 		super(m);
 		// TODO Auto-generated constructor stub
 	}
 
-
-	@Override
 	void dessiner() {
 		// TODO Auto-generated method stub
 		//on se place dans un coin du carré dans lequel notre forme est contenue
-		m.placer(x-t/2, y-t/2);
-		m.orienter(90);
+		m.placer(x-t/2, y);
+		m.orienter(45);
 		m.baisser();
 		for(int i=0;i<4;i++) {
 			m.avancer(t);
@@ -21,8 +19,5 @@ public class Carre extends Forme {
 		}
 		m.lever();
 	}
-    
-    void avancer(){ //par default une forme quand elle avance ne fait rien à part dessiner, on override si besoin dasn les classes filles
-        this.dessiner();
-    }
+
 }

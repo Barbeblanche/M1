@@ -19,5 +19,8 @@ public class Losange extends Forme{
 		}
 		m.lever();
 	}
-
+    
+    void avancer(){ //par default une forme quand elle avance ne fait rien à part dessiner, on override si besoin dasn les classes filles
+        this.dessiner();
+    }
 }

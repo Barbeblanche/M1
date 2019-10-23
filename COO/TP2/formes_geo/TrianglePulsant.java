@@ -1,9 +1,9 @@
 package formes_geo;
 
-public class Triangle extends Forme {
+public class TrianglePulsant extends FormePulsante {
 
 	
-	public Triangle(MachineTrace m) {
+	public TrianglePulsant(MachineTrace m) {
 		super(m);
 		// TODO Auto-generated constructor stub
 	}
@@ -20,7 +20,5 @@ public class Triangle extends Forme {
 		}
 		m.lever();
 	}
-    void avancer(){ //par default une forme quand elle avance ne fait rien à part dessiner, on override si besoin dasn les classes filles
-        this.dessiner();
-    }
+
 }

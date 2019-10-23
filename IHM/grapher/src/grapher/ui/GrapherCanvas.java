@@ -8,13 +8,15 @@ import java.util.Vector;
 import javafx.util.converter.DoubleStringConverter;
 
 import javafx.application.Application.Parameters;
-
+import javafx.event.EventHandler;
+import javafx.event.EventType;
 import javafx.geometry.Point2D;
 import javafx.geometry.Rectangle2D;
 
 import javafx.scene.paint.Color;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.canvas.Canvas;
 
 
@@ -44,6 +46,17 @@ public class GrapherCanvas extends Canvas {
 		super(WIDTH, HEIGHT);
 		this.interaction = new Interaction(this);
 		this.addEventHandler(MouseEvent.ANY, this.interaction);
+		this.addEventHandler(ScrollEvent.ANY, new EventHandler<ScrollEvent>() {
+
+			@Override
+			public void handle(ScrollEvent e) {
+				if (e.getEventType()==ScrollEvent.SCROLL) {
+					Point2D p = new Point2D(e.getX(), e.getY());
+					zoom(p,e.getDeltaY());
+				}
+			}
+			
+		});
 		xmin = -PI/2.; xmax = 3*PI/2;
 		ymin = -1.5;   ymax = 1.5;
 		
@@ -64,7 +77,7 @@ public class GrapherCanvas extends Canvas {
 		redraw();
 	}	
 	
-	private void redraw() {
+	void redraw() {
 		GraphicsContext gc = getGraphicsContext2D();
 		W = getWidth();
 		H = getHeight();
@@ -134,7 +147,8 @@ public class GrapherCanvas extends Canvas {
 		for(double x = -xstep; x > xmin; x -= xstep) { drawXTick(gc, x); }
 		for(double y = ystep; y < ymax; y += ystep)  { drawYTick(gc, y); }
 		for(double y = -ystep; y > ymin; y -= ystep) { drawYTick(gc, y); }
-		
+				
+		interaction.drawFeedBack(gc);
 		gc.setLineDashes(null);
 	}
 	
