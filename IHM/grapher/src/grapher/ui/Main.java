@@ -10,11 +10,9 @@ import javafx.scene.input.MouseEvent;
 
 public class Main extends Application {
 	public void start(Stage stage) {
-		BorderPane root = new BorderPane();
-		GrapherCanvas grapher = new GrapherCanvas(getParameters());
-		root.setCenter(grapher);
+		Fenetre f = new Fenetre(getParameters());
 		stage.setTitle("grapher");
-		stage.setScene(new Scene(root));
+		stage.setScene(new Scene(f));
 		stage.show();
 	}
 	public static void main(String[] args) {
