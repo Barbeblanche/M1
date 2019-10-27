@@ -1,3 +1,5 @@
+ #!/usr/bin/python2.6
+# -*-coding:Latin-1 -*
 
 from sklearn.neural_network import MLPClassifier
 from sklearn.datasets import load_digits
@@ -7,14 +9,17 @@ from sklearn.metrics import accuracy_score
 X = [[0., 0.], [0., 1.], [1., 0.], [1., 1.]]
 clf = MLPClassifier(solver='lbfgs', activation='identity', hidden_layer_sizes=())
 
+#1.1
 y_and = [0, 0, 0, 1]
 clf.fit(X, y_and)
 #print(clf.predict([[1., 0.]]))
 
+#1.2
 y_or = [0, 1, 1, 1]
 clf.fit(X, y_or)
 #print(clf.predict([[1., 1.]]))
 
+#1.3.a
 y_xor = [0, 1, 1, 0]
 clf.fit(X, y_xor)
 print("0 couches cachées : " +  str(clf.predict(X)))
