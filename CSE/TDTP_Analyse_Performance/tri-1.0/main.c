@@ -81,19 +81,22 @@ int main(int argc, char *argv[]) {
         scanf(" %d", &tableau[i]);
 
     /* Algo */
-	struct rusage usage;
+	struct rusage usage_start, usage_end;
 	struct timeval start,end;
 	gettimeofday(&start,NULL);
-	getrusage(RUSAGE_SELF, &usage);
+	getrusage(RUSAGE_SELF, &usage_start);
     algo_principal(parallelism, tableau, taille, arg);
-	gettimeofday(&end,NULL);
-	getrusage(RUSAGE_SELF, &usage);
+	//gettimeofday(&end,NULL);
+	getrusage(RUSAGE_SELF, &usage_end);
 	if (temps){
-		printf("Le temps de traitement est : %lld us ; %lld sec\n", to_usec(end) - to_usec(start),(to_usec(end) - to_usec(start))/1000000);
+		printf("%lld\n", to_usec(end) - to_usec(start));
 	}
 	if (ressources){
-		printf("Le temps d'utilisation user CPU est : %lld us\n", to_usec(usage.ru_utime));
-		printf("Le temps d'utilisation system CPU est : %lld us\n", to_usec(usage.ru_stime));
+	    long long int tmp_total_start = to_usec(usage_start.ru_utime) + to_usec(usage_start.ru_stime);
+	    long long int tmp_total_end = to_usec(usage_end.ru_utime) + to_usec(usage_end.ru_stime);
+	    long long int tmp_total = tmp_total_end-tmp_total_start;
+
+		printf("%lld\n", tmp_total);
 	}
 
     return 0;

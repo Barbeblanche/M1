@@ -42,10 +42,11 @@ public class GrapherCanvas extends Canvas {
 	protected double xmin, xmax;
 	protected double ymin, ymax;
 
-	protected Vector<Function> functions = new Vector<Function>();
+	private Vector<Function> functions;
 	
-	public GrapherCanvas() {
+	public GrapherCanvas(Vector<Function> f) {
 		super(WIDTH, HEIGHT);
+		setFunctions(f);
 		bold = new ArrayList<Function>();
 		this.interaction = new Interaction(this);
 		this.addEventHandler(MouseEvent.ANY, this.interaction);
@@ -122,7 +123,7 @@ public class GrapherCanvas extends Canvas {
 			Xs[i] = X(x);
 		}
 
-		for(Function f: functions) {
+		for(Function f: getFunctions()) {
 			// y values
 			double Ys[] = new double[N];
 			for(int i = 0; i < N; i++) {
@@ -132,6 +133,7 @@ public class GrapherCanvas extends Canvas {
 				for (Function fb : this.bold) {
 					if (f.toString() == fb.toString()) {
 						gc.setLineWidth(2.0);
+						//TODO: changer l'ordre de surlignage (axe en gras)
 					}else {
 						gc.setLineWidth(1.0);
 					}
@@ -230,5 +232,13 @@ public class GrapherCanvas extends Canvas {
 		xmin = min(x0, x1); xmax = max(x0, x1);
 		ymin = min(y0, y1); ymax = max(y0, y1);
 		redraw();
+	}
+
+	protected Vector<Function> getFunctions() {
+		return functions;
+	}
+
+	protected void setFunctions(Vector<Function> functions) {
+		this.functions = functions;
 	}
 }
