@@ -84,10 +84,10 @@ int main(int argc, char *argv[]) {
 	struct rusage usage_start, usage_end;
 	struct timeval start,end;
 	gettimeofday(&start,NULL);
-	getrusage(RUSAGE_SELF, &usage_start);
+	//getrusage(RUSAGE_SELF, &usage_start);
     algo_principal(parallelism, tableau, taille, arg);
-	//gettimeofday(&end,NULL);
-	getrusage(RUSAGE_SELF, &usage_end);
+	gettimeofday(&end,NULL);
+	//getrusage(RUSAGE_SELF, &usage_end);
 	if (temps){
 		printf("%lld\n", to_usec(end) - to_usec(start));
 	}
