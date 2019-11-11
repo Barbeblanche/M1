@@ -13,7 +13,7 @@ for nb_thread in [2,4,8,16,32]:
 taille = 10000
 min_time = -1
 
-while taille <= 100000:
+while taille <= 1000000:
     nom_vecteur = "vecteurs/vecteur_" + str(taille) + ".in"
     #subprocess.call("./creer_vecteur -s " + str(taille) + " > " + nom_vecteur, shell=True)
     min_sequentiel = -1
