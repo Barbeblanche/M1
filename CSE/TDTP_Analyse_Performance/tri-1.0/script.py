@@ -14,17 +14,18 @@ for nb_thread in range(2, 20):
 
 taille = 10000
 min_time = -1
-while taille <= 100000000:
+while taille <= 10000000:
     nom_vecteur = "vecteurs/vecteur_" + str(taille) + ".in"
     subprocess.call("./creer_vecteur -s " + str(taille) + " > " + nom_vecteur, shell=True)
     #for nb_thread in range(2,20):
-    for i in range(5):
-        out_thread = subprocess.check_output("./tri_threads -t -p " + str(nb_thread) + " < " + nom_vecteur, shell=True)
-        fichiers_thread[8].write(str(taille) + ";" + str(i) + ";" + out_thread.decode("utf-8"))
     for i in range (5):
         out_seq = subprocess.check_output("./tri_sequentiel -t < " + nom_vecteur, shell=True)
         if (min_time < int(out_seq.decode("utf-8"))):
             min_time = int(out_seq.decode("utf-8"))
         fichier_seq.write(str(taille) + ";" + str(i) + ";" + out_seq.decode("utf-8"))
     fichier_seq_min.write(str(taille) + ";" + str(min_time))
+    for i in range(5):
+        out_thread = subprocess.check_output("./tri_threads -t -p " + str(nb_thread) + " < " + nom_vecteur, shell=True)
+        fichiers_thread[8].write(str(taille) + ";" + str(i) + ";" + out_thread.decode("utf-8"))
+
     taille+=50000
