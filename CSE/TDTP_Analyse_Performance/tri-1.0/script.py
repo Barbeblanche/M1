@@ -31,7 +31,7 @@ while taille <= 1000000:
     ##
     #Calcul de l'accélération pour la version thread
     if (min_sequentiel != -1):
-        for i in range(5):
+        for i in range(20):
             j = 0
             for nb_thread in [2,4,8,16,32]:
                 out_thread = subprocess.check_output("./tri_threads -t -p " + str(nb_thread) + " < " + nom_vecteur, shell=True)
