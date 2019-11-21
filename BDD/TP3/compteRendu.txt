@@ -1,0 +1,7 @@
+db.restaurants.find( {"cuisine": "Italian","isActive":true} ,{"name":1,"isActive":1})
+
+db.restaurants.find( {"cuisine": "Italian","address.zipcode":{$gt : "10075"},"telephoneNumber":{$exists: true}})
+
+db.restaurants.find({$or:[{"cuisine":"Italian"},{"address.zipcode": "10075"}]})
+
+db.comments.insert(
