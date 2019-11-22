@@ -1,12 +1,16 @@
 #include <stdio.h>
+#include "lib_es.h"
 
 int main (){
-	char tab[40];
-	for( int i = 0; i < 40; i += 1){
-		tab[i] = i;
-	}
-	for( int i = 0; i < 40; i += 1){
-		printf("%d\n",tab[i] );
-	}
+	FICHIER *f;
+	f = ouvrir("exemple.txt",'r');
+	
+	printf("%d\n",f->df);
+	char * p = malloc(sizeof(char)*50);
+	lire(p,)
+
+	//ecrire("bonjour okdfgdfpokog1\n",1,22,f);
+	//ecrire("tyuiopi sdfsdfsdfsdf1\n",1,22,f);
+	fermer(f);
 	return 0;
 }

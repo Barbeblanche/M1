@@ -4,13 +4,15 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <stdlib.h>
+#include <string.h>
 
 #define SIZE 128
 
 typedef struct {
 	int df;
 	char *tampon;
-	int nb_octets_ecrits;
+	int indice;
 	int mode;
 } FICHIER;
 
