@@ -4,4 +4,17 @@ db.restaurants.find( {"cuisine": "Italian","address.zipcode":{$gt : "10075"},"te
 
 db.restaurants.find({$or:[{"cuisine":"Italian"},{"address.zipcode": "10075"}]})
 
-db.comments.insert(
+db.comments.insert({"_id": "1","restaurent_id": "41446358", "name_client" : "Dupont", "comment" : "pas ouf", "type" : "4"})
+db.comments.insert({"_id": "2","restaurent_id": "41446358", "name_client" : "Dupont", "comment" : "vraiment pas ouf", "type" : "2"})
+db.comments.insert({"_id": "3","restaurent_id": "41636858", "name_client" : "Depierre", "comment" : "très bien", "type" : "8"})
+db.comments.insert({"_id": "4","restaurent_id": "50017605", "name_client" : "Duchamps", "comment" : "pas bien", "type" : "3"})
+db.comments.insert({"_id": "5","restaurent_id": "41590236", "name_client" : "Delamontage", "comment" : "bien", "type" : "6"})
+db.comments.insert({"_id": "6","restaurent_id": "40763382", "name_client" : "Deschamps", "comment" : "Benzema me manque", "type" : "10"})
+
+
+db.comments.aggregate([{ $lookup: {from: "restaurants",localField: "restaurent_id",foreignField: "restaurant_id",as: "name_restaurant"}} ])
+
+
+
+db.restaurants.createIndex( { cuisine: -1 } )
+
