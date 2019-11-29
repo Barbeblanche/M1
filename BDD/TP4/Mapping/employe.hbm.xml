@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+"-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+  <class name="Employe" table="EMPLOYE">
+
+   <id name="Ep_id" type="long" column="EP_ID" >
+      <!--<generator class="native"/>-->
+   <generator class="sequence">
+   		<param name="sequence">seq_emp</param>
+   </generator>
+  </id>
+
+  <property name="NomE" column="NOME" />
+  
+  <property name="Adresse" column="ADRESSE" />
+  
+  <joined-subclass name="Gardien" table="GARDIEN">
+		<key column="EP_ID"/>
+		
+		<set name="Cages" table="CG_GD" inverse="true" cascade="save-update">
+  			<key column="EP_ID"  />
+			<many-to-many class="Cage"  column="CG_ID"/>
+  		</set>
+  </joined-subclass>
+  
+ <joined-subclass name="Responsable" table="RESPONSABLE">
+		<key column="EP_ID"/>
+		<property name="NoAlle" column="NOALLE" />
+		
+  </joined-subclass>
+ 
+  
+ </class>
+</hibernate-mapping>

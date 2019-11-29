@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+"-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+  <class name="Animal" table="ANIMAL">
+   <id name="An_id" type="long" column="AN_ID" >
+   <!--<generator class="native"/>-->
+   <generator class="sequence">
+   		<param name="sequence">seq_animal</param>
+   </generator>
+  </id>
+
+  <property name="NomA" column="NOMA">
+  </property>
+
+  <many-to-one name="LaCage" column="CG_ID" class="Cage" not-null="true"/>
+  
+  <property name="FonctionCage" column="FONCTIONCAGE"></property>
+  <property name="Sexe" column="SEXE"></property>
+  <property name="Type" column="TYPE"></property>
+  <property name="Pays" column="PAYS"></property>
+  <property name="AnNais" column="ANNAIS"></property>
+  
+  <set name="Maladies" lazy="true" table="MA_AN" > 
+     <key column="MAL_ID" /> 
+     <element type="string" column="MALADIE" not-null="true" />
+   </set> 
+ 
+
+  
+   
+ </class>
+</hibernate-mapping>

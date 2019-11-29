@@ -1,6 +1,7 @@
 package downloader.fc;
 
 import java.net.URL;
+
 import java.net.URLConnection;
 import java.net.MalformedURLException;
 
@@ -10,10 +11,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 import javafx.beans.property.ReadOnlyDoubleWrapper;
+import javafx.concurrent.Task;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 
 
-public class Downloader implements Runnable {
+public class Downloader extends Task {
 	public static final int CHUNK_SIZE = 1024;
 
 	URL url;
@@ -51,9 +53,10 @@ public class Downloader implements Runnable {
 		return url.toString();
 	}
 	
+	/*
 	public ReadOnlyDoubleProperty progressProperty() {
 		return progress.getReadOnlyProperty();
-	}
+	}*/
 	
 	public String download() throws InterruptedException {
 		byte buffer[] = new byte[CHUNK_SIZE];
@@ -65,7 +68,7 @@ public class Downloader implements Runnable {
 			catch(IOException e) { continue; }
 			
 			size += count;
-			progress.setValue(1.*size/content_length);
+			updateProgress(count, 1);
 			Thread.sleep(1000);
 			
 			try {
@@ -82,10 +85,12 @@ public class Downloader implements Runnable {
 		temp.renameTo(new File(filename));
 		return filename;
 	}
-	
-	public void run() {
+
+	@Override
+	protected Object call() throws Exception {
 		try {
 			download();
+			return null;
 		}
 		catch(InterruptedException e) {
 			throw new RuntimeException(e);
