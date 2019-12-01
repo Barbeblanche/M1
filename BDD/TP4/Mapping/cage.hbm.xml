@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+"-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+  <class name="Cage" table="CAGE">
+   <id name="Cg_id" type="long" column="CG_ID" >
+   <!--<generator class="native"/>-->
+   <generator class="sequence">
+   		<param name="sequence">seq_cage</param>
+   </generator>
+  </id>
+
+  <property name="NoCage" column="NOCAGE">
+  </property>
+
+  <property name="Fonction"  column="FONCTION"></property>
+  <property name="NoAlle"  column="NOALLE"></property>
+  <set name="Gardiens"  table="CG_GD"  inverse="true"  cascade="save-update">
+	<key column="CG_ID"  />
+	<many-to-many class="Gardien"  column="EP_ID"/>
+  </set>
+
+  <set name="Animals"  inverse="true"  cascade="save-update">
+	<key column="AN_ID"  />
+	<one-to-many class="Animal" />
+  </set>
+  
+   
+ </class>
+</hibernate-mapping>

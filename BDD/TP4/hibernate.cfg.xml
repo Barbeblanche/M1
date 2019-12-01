@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-configuration PUBLIC
+"-//Hibernate/Hibernate Configuration DTD//EN"
+"http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+
+<hibernate-configuration>
+<session-factory>
+      <property name="hibernate.connection.driver_class"> oracle.jdbc.driver.OracleDriver</property>
+      <property name="hibernate.connection.url"> jdbc:oracle:thin:@im2ag-oracle.e.ujf-grenoble.fr:1521:im2ag</property>
+      <property name="hibernate.connection.username">salamanl</property>
+      <property name="hibernate.connection.password">lelemomo1P</property>
+      <property name="hibernate.connection.pool_sizee">10</property>
+      <property name="show_sql">true</property>
+      <property name="dialect">org.hibernate.dialect.OracleDialect</property>
+      <!--<property name="dialect">org.hibernate.dialect.Oracle9iDialect</property>-->
+      
+      <!-- Drop and recreate the db schema on startup -->
+      <property name="hibernate.hbm2ddl.auto">create</property>
+     <!-- Use an existing db schema <property name="hibernate.hbm2ddl.auto">update</property> -->
+	   <!-- Mapping files -->
+      <mapping resource="Mapping/animal.hbm.xml"/>
+      <mapping resource="Mapping/employe.hbm.xml"/>
+      <mapping resource="Mapping/cage.hbm.xml"/>	  
+</session-factory>
+</hibernate-configuration>
