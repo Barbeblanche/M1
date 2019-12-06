@@ -5,6 +5,7 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -63,8 +64,10 @@ public class Main extends Application {
 			Thread p = new Thread(downloader);
 			p.start();
 			prog = new ProgressBar();
-			prog.setPrefWidth(500);
-			progress_pane.getChildren().add(prog);
+			Button delete = new Button("X");
+			HBox hb = new HBox(prog,delete);
+			
+			progress_pane.getChildren().add(hb);
 			downloader.progressProperty().addListener(new ChangeListener<Number>() {
 
 				@Override
@@ -80,6 +83,13 @@ public class Main extends Application {
 					prog.prefWidthProperty().bind(progress_pane.prefWidthProperty());
 					//L'utilisation de Task rend le fonctionnement plus simple car nous n'avons plus besoin des méthodes 
 					// pour mettre à jour le progress du download, c'est gérer automatiquement.
+				}
+			});
+			delete.setOnMouseClicked(new EventHandler<Event>() {
+
+				@Override
+				public void handle(Event event) {
+					progress_pane.getChildren().remove(hb);
 				}
 			});
 		}
