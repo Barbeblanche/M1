@@ -78,6 +78,18 @@ public class LecteurMP3 extends BorderPane{
 				if (newValue) {
 					set_bot();
 					stage.setHeight(500);
+					stage.heightProperty().addListener(new ChangeListener<Number>() {
+
+						@Override
+						public void changed(ObservableValue<? extends Number> observable, Number oldValue,
+								Number newValue) {
+							if ((Double)newValue<200) {
+								playlist.setSelected(false);
+								unset_bot();
+							}
+							
+						}
+					});
 				}else {
 					unset_bot();
 					stage.setHeight(stage.getHeight()-musics.getHeight());
