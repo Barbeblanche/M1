@@ -7,6 +7,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.Event;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ProgressBar;
@@ -65,9 +66,10 @@ public class Main extends Application {
 			p.start();
 			prog = new ProgressBar();
 			Button delete = new Button("X");
-			HBox hb = new HBox(prog,delete);
-			
+			Button pause = new Button("||");
+			HBox hb = new HBox(prog,delete,pause);
 			progress_pane.getChildren().add(hb);
+			prog.setPrefWidth(progress_pane.getPrefWidth()-50);
 			downloader.progressProperty().addListener(new ChangeListener<Number>() {
 
 				@Override
@@ -79,8 +81,8 @@ public class Main extends Application {
 						}
 						
 					});	*/
+					System.out.println((Double)downloader.getProgress());
 					prog.setProgress((Double)downloader.getProgress());
-					prog.prefWidthProperty().bind(progress_pane.prefWidthProperty());
 					//L'utilisation de Task rend le fonctionnement plus simple car nous n'avons plus besoin des méthodes 
 					// pour mettre à jour le progress du download, c'est gérer automatiquement.
 				}
@@ -90,6 +92,21 @@ public class Main extends Application {
 				@Override
 				public void handle(Event event) {
 					progress_pane.getChildren().remove(hb);
+					p.interrupt();
+				}
+			});
+			pause.setOnMouseClicked(new EventHandler<Event>() {
+
+				@Override
+				public void handle(Event event) {
+					if (pause.getText()=="||") {
+						pause.setText(">");
+						//TODO
+						//Question 6 non-traitée
+					}else {
+						pause.setText("||");
+						//TODO
+					}
 				}
 			});
 		}

@@ -53,6 +53,14 @@ public class Downloader extends Task {
 		return url.toString();
 	}
 	
+	public void play() {
+		
+	}
+	
+	public void pause() {
+		
+	}
+	
 	/*
 	public ReadOnlyDoubleProperty progressProperty() {
 		return progress.getReadOnlyProperty();
@@ -68,7 +76,8 @@ public class Downloader extends Task {
 			catch(IOException e) { continue; }
 			
 			size += count;
-			updateProgress(count, 1);
+			System.out.println("size = " + size);
+			updateProgress(1.*size/content_length, 1);
 			Thread.sleep(1000);
 			
 			try {

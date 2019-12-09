@@ -101,7 +101,7 @@ public class Fenetre extends SplitPane {
 	public void supprimerFonction() {
 		int index = lv.getSelectionModel().getSelectedIndex();
 		if(index == -1) {
-			Alert a = new Alert(AlertType.ERROR,"Selectionne une expression stp");
+			Alert a = new Alert(AlertType.ERROR,"Selectionnez une expression svp");
 			a.showAndWait();
 			return;
 		}
